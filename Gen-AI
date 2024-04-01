@@ -1,0 +1,45 @@
+import pandas as pd 
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt 
+
+exam_df = pd.read_csv('content/exams.csv')
+
+exam_df
+y = exam_df['math score']
+
+features = ['reading score', 'writing score']
+X = exam_df[features]
+train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=400)
+
+mat_model = RandomForestRegressor(random_state=1)
+mat_model.fit(train_X, train_y)
+mat_model_predictions = mat_model.predict(val_X)
+
+mat_model_mae = mean_absolute_error(mat_model_predictions, val_y)
+
+mat_model_mae
+
+mat_model_test = mat_model.predict(X)
+exam_df['PredMat'] = mat_model_test.round()
+
+exam_df.describe()
+mat_vs_pred = pd.DataFrame(exam_df['math score'])
+mat_vs_pred['predicted'] = mat_model_test
+mat_vs_pred['predicted'] = round(mat_vs_pred['predicted'], 0)
+
+mat_vs_pred
+
+mat_vs_pred['diff'] = mat_vs_pred['math score'] - mat_vs_pred['predicted']
+mat_vs_pred
+actual_predic_mat_vs_pred = pd.DataFrame(mat_vs_pred['math score'])
+actual_predic_mat_vs_pred
+
+actual_predic_mat_vs_pred['predicted'] = mat_vs_pred['predicted']
+actual_predic_mat_vs_pred
+
+plt.figure(figsize=(20, 16))
+plt.plot(actual_predic_mat_vs_pred['math score'], label='Actual Math Scores', marker='x'); plt.plot(actual_predic_mat_vs_pred['predicted'], label='Predicted Math Scores', marker='o')
+plt.xlabel('Dataset width'); plt.ylabel('Math Scores'); plt.title('Actual vs. Predicted Math Scores')
+plt.legend(); plt.show()
